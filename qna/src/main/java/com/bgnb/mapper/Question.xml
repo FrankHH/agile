@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bgnb.mapper.QuestionMapper">
+
+    <resultMap type="com.bgnb.pojo.Question" id="qnuMap">
+        <id column="qid" property="qid" />
+        <result column="uid" property="uid"/>
+        <result column="title" property="title"/>
+        <result column="content" property="content"/>
+        <result column="state" property="state"/>
+        <result column="time" property="time"/>
+        <association property="user" javaType="com.bgnb.pojo.User">
+            <result column="name" property="name"/>
+            <result column="pictureurl" property="pictureurl"/>
+        </association>
+    </resultMap>
+
+    <select id="getById" parameterType="int" resultMap="qnuMap">
+        SELECT *
+        FROM question q
+        JOIN user u ON u.uid = q.uid
+        WHERE q.qid = #{qid}
+    </select>
+
+    <select id="getByUserId" parameterType="int" resultMap="qnuMap">
+        SELECT *
+        FROM question q
+        JOIN user u ON u.uid = q.uid
+        WHERE q.uid = #{uid}
+        ORDER BY state, time DESC
+    </select>
+
+    <select id="getFollowUserQuestion" parameterType="int" resultMap="qnuMap">
+        SELECT u.name, u.pictureurl, q.qid, q.uid, q.title, q.content, q.state, q.time
+        FROM followu f
+        JOIN user u ON f.ufid = u.uid
+        JOIN question q ON u.uid = q.uid
+        WHERE f.uid = #{uid}
+        ORDER BY q.time DESC
+    </select>
+
+    <select id="getFollowQuestion" parameterType="int" resultMap="qnuMap">
+        SELECT u.name, u.pictureurl, q.qid, q.uid, q.title, q.content, q.state, q.time
+        FROM followq f
+        JOIN question q ON f.qid = q.qid
+        JOIN user u ON q.uid = u.uid
+        WHERE f.uid = #{uid}
+        ORDER BY q.time DESC
+    </select>
+
+    <insert id="addQuestion" parameterType="com.bgnb.pojo.Question" useGeneratedKeys="true" keyProperty="question.qid">
+        INSERT INTO question (uid, title, content, state, time)
+        VALUES (#{question.uid}, #{question.title}, #{question.content}, #{question.state}, NOW())
+    </insert>
+
+    <update id="closeQuestion" parameterType="int">
+        UPDATE question SET state = 1
+        WHERE qid = #{qid}
+    </update>
+
+    <update id="openQuestion" parameterType="int">
+        UPDATE question SET state = 0
+        WHERE qid = #{qid}
+    </update>
+
+    <delete id="deleteQuestion" parameterType="int">
+        DELETE FROM question
+        WHERE qid = #{qid}
+    </delete>
+
+    <select id="getRecentQuestion" parameterType="int" resultMap="qnuMap">
+        SELECT *
+        FROM question q
+        JOIN user u ON u.uid = q.uid
+        ORDER BY time DESC LIMIT 10 OFFSET #{offset}
+    </select>
+</mapper>

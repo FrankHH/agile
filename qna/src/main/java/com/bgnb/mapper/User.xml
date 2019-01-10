@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bgnb.mapper.UserMapper">
+    <select id="getById" parameterType="int" resultType="User">
+        SELECT *
+        FROM user
+        WHERE uid = #{uid}
+    </select>
+
+    <select id="getFollowUserList" parameterType="int" resultType="User">
+        SELECT u.uid, u.name, u.pictureurl
+        FROM user u
+        JOIN followu f ON u.uid = f.ufid
+        WHERE f.uid = #{uid}
+    </select>
+
+    <insert id="addUser" parameterType="com.bgnb.pojo.User" useGeneratedKeys="true" keyProperty="user.uid">
+        INSERT INTO user ( openid)
+        VALUES ( #{user.openid})
+    </insert>
+
+    <insert id="addFollowUser">
+        INSERT INTO followu (uid, ufid)
+        VALUES (#{uid}, #{ufid})
+    </insert>
+
+    <select id="getByOpenid" resultType="User">
+        SELECT *
+        FROM user
+        WHERE openid = #{openid}
+    </select>
+
+    <update id="addUserInfo">
+        UPDATE user SET name = #{name}, pictureurl = #{pictureurl}
+        WHERE uid = #{uid}
+    </update>
+
+    <delete id="removeFollowUser">
+        DELETE FROM followu
+        WHERE uid = #{uid} AND ufid = #{ufid}
+    </delete>
+
+    <insert id="addFollowQuestion">
+        INSERT INTO followq (uid, qid)
+        VALUES (#{uid}, #{qid})
+    </insert>
+
+    <delete id="removeFollowQuestion">
+        DELETE FROM followq
+        WHERE uid = #{uid} AND qid = #{qid}
+    </delete>
+
+    <select id="checkFollowQuestion" resultType="int">
+        SELECT COUNT(*)
+        FROM followq
+        WHERE uid = #{uid} AND qid = #{qid};
+    </select>
+
+    <select id="checkFollowUser" resultType="int">
+        SELECT COUNT(*)
+        FROM followu
+        WHERE uid = #{uid} AND ufid = #{ufid};
+    </select>
+
+</mapper>
